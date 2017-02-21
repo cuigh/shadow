@@ -2,9 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
-	"strings"
+	"os"
+)
+
+const (
+	Version = "v0.6"
 )
 
 func main() {
@@ -30,13 +35,20 @@ func loadConfig() *Config {
 		proxy   string
 		timeout int64
 		verbose bool
+		version bool
 	)
+	registerBoolArg(&version, "version", "v", false, "Prints the shadow version")
 	registerStringArg(&config, "config", "c", "", "Configuration file")
 	registerStringArg(&address, "addr", "a", ":1080", "Listen address")
 	registerStringArg(&proxy, "proxy", "p", "", "Parent proxy address")
 	registerInt64Arg(&timeout, "timeout", "t", 30000, "Timeout for response header of milliseconds")
-	registerBoolArg(&verbose, "verbose", "v", false, "Verbose output")
+	registerBoolArg(&verbose, "verbose", "", false, "Verbose output")
 	flag.Parse()
+
+	if version {
+		fmt.Println("shadow " + Version)
+		os.Exit(0)
+	}
 
 	if config != "" {
 		cfg, err = NewConfig(config)
@@ -52,23 +64,26 @@ func loadConfig() *Config {
 		}
 	}
 
-	if cfg.Proxy != "" && !strings.HasPrefix(cfg.Proxy, "http://") {
-		cfg.Proxy = "http://" + cfg.Proxy
-	}
 	return cfg
 }
 
 func registerStringArg(p *string, name, shortName, value, usage string) {
 	flag.StringVar(p, name, value, usage)
-	flag.StringVar(p, shortName, value, usage+" (shorthand)")
+	if shortName != "" {
+		flag.StringVar(p, shortName, value, usage+" (shorthand)")
+	}
 }
 
 func registerInt64Arg(p *int64, name, shortName string, value int64, usage string) {
 	flag.Int64Var(p, name, value, usage)
-	flag.Int64Var(p, shortName, value, usage+" (shorthand)")
+	if shortName != "" {
+		flag.Int64Var(p, shortName, value, usage+" (shorthand)")
+	}
 }
 
 func registerBoolArg(p *bool, name, shortName string, value bool, usage string) {
 	flag.BoolVar(p, name, value, usage)
-	flag.BoolVar(p, shortName, value, usage+" (shorthand)")
+	if shortName != "" {
+		flag.BoolVar(p, shortName, value, usage+" (shorthand)")
+	}
 }
