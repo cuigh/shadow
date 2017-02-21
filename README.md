@@ -24,11 +24,15 @@ Using configuration file instead of command line args
 
 ## Args
 
-* config, c: configuration file, all other args arg ignored if config is specified.
-* addr, a: Listen address (default ":1080").
-* proxy, p: Parent proxy address.
-* timeout, t: Timeout for waiting response headers, by milliseconds.
-* verbose, v: Verbose output.
+Name       | Description
+---------- | ----------
+help, h    | Prints usage.
+version, v | Prints shadow version.
+config, c  | configuration file, all other args arg ignored if config is specified.
+addr, a    | Listen address (default ":1080").
+proxy, p   | Parent proxy address.
+timeout, t | Timeout for waiting response headers, by milliseconds.
+verbose    | Verbose output.
 
 ## Configuration
 
