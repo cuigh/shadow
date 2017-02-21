@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,13 +36,18 @@ func loadConfig() *Config {
 		verbose bool
 		version bool
 	)
-	registerBoolArg(&version, "version", "v", false, "Prints the shadow version")
-	registerStringArg(&config, "config", "c", "", "Configuration file")
-	registerStringArg(&address, "addr", "a", ":1080", "Listen address")
-	registerStringArg(&proxy, "proxy", "p", "", "Parent proxy address")
-	registerInt64Arg(&timeout, "timeout", "t", 30000, "Timeout for response header of milliseconds")
-	registerBoolArg(&verbose, "verbose", "", false, "Verbose output")
-	flag.Parse()
+
+	fs := NewFlags(`shadow is a simple and fast http/https proxy written by Go.
+
+    shadow -a[-addr] :7777
+    shadow -a[-addr] :7777 -p[-proxy] :7778 -verbose`)
+	fs.Bool(&version, "version", "v", false, "Prints the shadow version")
+	fs.String(&config, "config", "c", "", "Configuration file")
+	fs.String(&address, "addr", "a", ":1080", "Listen address")
+	fs.String(&proxy, "proxy", "p", "", "Parent proxy address")
+	fs.Int64(&timeout, "timeout", "t", 30000, "Timeout for response header of milliseconds")
+	fs.Bool(&verbose, "verbose", "", false, "Verbose output")
+	fs.Parse()
 
 	if version {
 		fmt.Println("shadow " + Version)
@@ -63,27 +67,5 @@ func loadConfig() *Config {
 			Verbose: verbose,
 		}
 	}
-
 	return cfg
-}
-
-func registerStringArg(p *string, name, shortName, value, usage string) {
-	flag.StringVar(p, name, value, usage)
-	if shortName != "" {
-		flag.StringVar(p, shortName, value, usage+" (shorthand)")
-	}
-}
-
-func registerInt64Arg(p *int64, name, shortName string, value int64, usage string) {
-	flag.Int64Var(p, name, value, usage)
-	if shortName != "" {
-		flag.Int64Var(p, shortName, value, usage+" (shorthand)")
-	}
-}
-
-func registerBoolArg(p *bool, name, shortName string, value bool, usage string) {
-	flag.BoolVar(p, name, value, usage)
-	if shortName != "" {
-		flag.BoolVar(p, shortName, value, usage+" (shorthand)")
-	}
 }
