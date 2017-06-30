@@ -12,10 +12,12 @@ import (
 )
 
 type Config struct {
-	Address string `json:"addr"`
-	Proxy   string `json:"proxy"`
-	Timeout int64  `json:"timeout"`
-	Verbose bool   `json:"verbose"`
+	Address           string `json:"addr"`
+	Proxy             string `json:"proxy"`
+	Timeout           int64  `json:"timeout"`
+	Verbose           bool   `json:"verbose"`
+	ConnectionTimeout int64  `json:"connectionTimeout"`
+	DeadlineTimeout   int64  `json:"deadlineTimeout"`
 }
 
 func NewConfig(filename string) (*Config, error) {
@@ -41,6 +43,15 @@ func NewShadow(cfg *Config) (*Shadow, error) {
 	tp := &http.Transport{
 		ResponseHeaderTimeout: time.Duration(cfg.Timeout) * time.Millisecond,
 		//TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+		Dial: func(netw, addr string) (net.Conn, error) {
+			deadline := time.Now().Add(time.Duration(cfg.DeadlineTimeout) * time.Millisecond)
+			c, err := net.DialTimeout(netw, addr, time.Duration(cfg.ConnectionTimeout)*time.Millisecond)
+			if err != nil {
+				return nil, err
+			}
+			c.SetDeadline(deadline)
+			return c, nil
+		},
 	}
 
 	// set http proxy
