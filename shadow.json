@@ -1,6 +1,8 @@
 {
   "addr": ":7778",
   "timeout": 30000,
+  "connectionTimeout": 20000,
+  "deadlineTimeout": 25000,
   "proxy": "",
   "verbose": true
 }
