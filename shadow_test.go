@@ -10,8 +10,9 @@ import (
 
 func TestProxy(t *testing.T) {
 	const (
-		proxy  = "http://localhost:7777"
-		reqUrl = "http://headers.jsontest.com/"
+		proxy = "http://localhost:7777"
+		// reqURL = "http://headers.jsontest.com/"
+		reqURL = "http://www.baidu.com/"
 	)
 
 	u, err := url.Parse(proxy)
@@ -29,7 +30,7 @@ func TestProxy(t *testing.T) {
 		Transport: tp,
 	}
 
-	resp, err := c.Get(reqUrl)
+	resp, err := c.Get(reqURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,6 +51,7 @@ func BenchmarkDirect(b *testing.B) {
 		Transport: tp,
 	}
 
+	b.N = 100
 	for i := 0; i < b.N; i++ {
 		err := get(c)
 		if err != nil {
@@ -59,11 +61,7 @@ func BenchmarkDirect(b *testing.B) {
 }
 
 func BenchmarkProxy(b *testing.B) {
-	u, err := url.Parse("http://localhost:7777")
-	if err != nil {
-		b.Fatal(err)
-	}
-
+	u, _ := url.Parse("http://localhost:7777")
 	tp := &http.Transport{
 		ResponseHeaderTimeout: time.Second * 10,
 		Proxy: func(*http.Request) (*url.URL, error) {
@@ -74,6 +72,7 @@ func BenchmarkProxy(b *testing.B) {
 		Transport: tp,
 	}
 
+	b.N = 100
 	for i := 0; i < b.N; i++ {
 		err := get(c)
 		if err != nil {

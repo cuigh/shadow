@@ -12,10 +12,11 @@ import (
 )
 
 type Config struct {
-	Address string `json:"addr"`
-	Proxy   string `json:"proxy"`
-	Timeout int64  `json:"timeout"`
-	Verbose bool   `json:"verbose"`
+	Address     string `json:"addr"`
+	Proxy       string `json:"proxy"`
+	DialTimeout int64  `json:"dial_timeout"`
+	ReadTimeout int64  `json:"read_timeout"`
+	Verbose     bool   `json:"verbose"`
 }
 
 func NewConfig(filename string) (*Config, error) {
@@ -37,10 +38,20 @@ type Shadow struct {
 	tp  *http.Transport
 }
 
+// NewShadow create a shadow instance
 func NewShadow(cfg *Config) (*Shadow, error) {
 	tp := &http.Transport{
-		ResponseHeaderTimeout: time.Duration(cfg.Timeout) * time.Millisecond,
+		ResponseHeaderTimeout: time.Duration(cfg.ReadTimeout) * time.Millisecond,
+		DialContext: (&net.Dialer{
+			Timeout:   time.Duration(cfg.DialTimeout) * time.Millisecond,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:        100,
+		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
 		//TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+		ExpectContinueTimeout: 1 * time.Second,
 	}
 
 	// set http proxy
@@ -49,9 +60,7 @@ func NewShadow(cfg *Config) (*Shadow, error) {
 		if err != nil {
 			return nil, err
 		}
-		tp.Proxy = func(*http.Request) (*url.URL, error) {
-			return u, nil
-		}
+		tp.Proxy = http.ProxyURL(u)
 	}
 
 	return &Shadow{
@@ -67,7 +76,6 @@ func (s *Shadow) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodConnect {
 		s.handleHTTPS(w, r)
-		return
 	} else {
 		s.handleHTTP(w, r)
 	}

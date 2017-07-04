@@ -31,7 +31,8 @@ version, v | Prints shadow version.
 config, c  | configuration file, all other args arg ignored if config is specified.
 addr, a    | Listen address (default ":1080").
 proxy, p   | Parent proxy address.
-timeout, t | Timeout for waiting response headers, by milliseconds.
+dial_timeout, dt | Timeout for dialing proxy, by milliseconds.
+read_timeout, rt | Timeout for waiting response headers, by milliseconds.
 verbose    | Verbose output.
 
 ## Configuration
@@ -41,7 +42,8 @@ Here is a config sample
 ```json
 {
   "addr": ":7778",
-  "timeout": 30000,
+  "dial_timeout": 30000,
+  "read_timeout": 30000,
   "proxy": "",
   "verbose": true
 }

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Version = "v0.6"
+	Version = "v0.6.1"
 )
 
 func main() {
@@ -27,14 +27,15 @@ func main() {
 
 func loadConfig() *Config {
 	var (
-		cfg     = new(Config)
-		err     error
-		config  string
-		address string
-		proxy   string
-		timeout int64
-		verbose bool
-		version bool
+		cfg         = new(Config)
+		err         error
+		config      string
+		address     string
+		proxy       string
+		dialTimeout int64
+		readTimeout int64
+		verbose     bool
+		version     bool
 	)
 
 	fs := NewFlags(`shadow is a simple and fast http/https proxy written by Go.
@@ -45,7 +46,8 @@ func loadConfig() *Config {
 	fs.String(&config, "config", "c", "", "Configuration file")
 	fs.String(&address, "addr", "a", ":1080", "Listen address")
 	fs.String(&proxy, "proxy", "p", "", "Parent proxy address")
-	fs.Int64(&timeout, "timeout", "t", 30000, "Timeout for response header of milliseconds")
+	fs.Int64(&dialTimeout, "dial_timeout", "dt", 30000, "Timeout for dial proxy in milliseconds")
+	fs.Int64(&readTimeout, "read_timeout", "rt", 30000, "Timeout for read response header in milliseconds")
 	fs.Bool(&verbose, "verbose", "", false, "Verbose output")
 	fs.Parse()
 
@@ -61,10 +63,11 @@ func loadConfig() *Config {
 		}
 	} else {
 		cfg = &Config{
-			Address: address,
-			Proxy:   proxy,
-			Timeout: timeout,
-			Verbose: verbose,
+			Address:     address,
+			Proxy:       proxy,
+			DialTimeout: dialTimeout,
+			ReadTimeout: readTimeout,
+			Verbose:     verbose,
 		}
 	}
 	return cfg

@@ -1,6 +1,7 @@
 {
   "addr": ":7778",
-  "timeout": 30000,
+  "dial_timeout": 30000,
+  "read_timeout": 30000,
   "proxy": "",
   "verbose": true
 }
